@@ -1,0 +1,1049 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#e9e9e9">
+  <title>Content Calendar — CreativeHub</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Content Calendar Custom Styles & Component Enhancements */
+    .calendar-welcome {
+      margin-bottom: 20px;
+    }
+    
+    .calendar-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .calendar-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .month-display {
+      font-family: Manrope, sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      min-width: 160px;
+    }
+
+    .view-switcher {
+      display: flex;
+      align-items: center;
+      background: #e8e8e8;
+      padding: 3px;
+      border-radius: 12px;
+      gap: 2px;
+    }
+
+    .view-btn {
+      border: 0;
+      background: transparent;
+      padding: 6px 14px;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 9px;
+      color: #666;
+      transition: all 0.2s ease;
+    }
+
+    .view-btn.active {
+      background: #fff;
+      color: #111;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .calendar-container {
+      padding: 0;
+      overflow: hidden;
+      background: #fff;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+    }
+
+    /* Grid Calendar Layout */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .weekday-header {
+      background: #f8f8f8;
+      padding: 12px 8px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #777;
+      border-bottom: 1px solid #eee;
+      border-right: 1px solid #eee;
+    }
+
+    .weekday-header:last-child {
+      border-right: 0;
+    }
+
+    .calendar-day-cell {
+      min-height: 125px;
+      padding: 8px;
+      border-bottom: 1px solid #f0f0f0;
+      border-right: 1px solid #f0f0f0;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      position: relative;
+    }
+
+    .calendar-day-cell:nth-child(7n) {
+      border-right: 0;
+    }
+
+    .calendar-day-cell:hover {
+      background: #fafafa;
+    }
+
+    .calendar-day-cell.other-month {
+      background: #fcfcfc;
+      opacity: 0.45;
+    }
+
+    .calendar-day-cell.today {
+      background: #fcfcfd;
+    }
+
+    .day-number-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .day-number {
+      font-size: 11px;
+      font-weight: 700;
+      color: #333;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+    }
+
+    .calendar-day-cell.today .day-number {
+      background: #111;
+      color: #fff;
+    }
+
+    .add-task-quick {
+      opacity: 0;
+      font-size: 12px;
+      color: #888;
+      transition: opacity 0.15s ease;
+    }
+
+    .calendar-day-cell:hover .add-task-quick {
+      opacity: 1;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 100px;
+    }
+
+    .task-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: 7px;
+      font-size: 9px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+
+    .task-chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+    }
+
+    /* Task Status Badges matching Reference */
+    /* POSTED: Light grey background, dark text, checkmark indicator */
+    .task-status-posted {
+      background: #ececec;
+      color: #222;
+      border-color: #dedede;
+    }
+
+    /* PROGRESS: Light yellow background with yellow bar/stripe accent */
+    .task-status-progress {
+      background: #fffbeb;
+      color: #854d0e;
+      border-color: #fef3c7;
+      border-left: 3px solid #f59e0b;
+    }
+
+    /* WAITING: Clean white or neutral background with subtle outline */
+    .task-status-waiting {
+      background: #ffffff;
+      color: #555;
+      border-color: #e5e5e5;
+    }
+
+    .task-icon {
+      font-size: 10px;
+      display: inline-grid;
+      place-items: center;
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    .task-title-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .task-more-tag {
+      font-size: 8px;
+      font-weight: 700;
+      color: #888;
+      padding: 2px 4px;
+      text-align: center;
+      background: #eee;
+      border-radius: 4px;
+    }
+
+    /* Modal Form Popout (Matching Image Reference 2) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #fff;
+      width: min(520px, 100%);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 25px 70px rgba(0,0,0,0.18);
+      transform: translateY(15px) scale(0.98);
+      transition: transform 0.25s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-family: Manrope, sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+    }
+
+    .modal-close {
+      border: 0;
+      background: #f1f1f1;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      color: #555;
+      transition: background 0.2s;
+    }
+
+    .modal-close:hover {
+      background: #e5e5e5;
+      color: #111;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .form-control {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      border: 1px solid #e2e2e2;
+      border-radius: 12px;
+      background: #fbfbfb;
+      font-size: 11px;
+      color: #111;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: #111;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+
+    textarea.form-control {
+      height: 90px;
+      padding: 12px 14px;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+
+    /* Status Selector Badges inside Form */
+    .status-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .status-radio {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .status-tile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      border: 1px solid #e5e5e5;
+      border-radius: 11px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #fafafa;
+      text-align: center;
+    }
+
+    .status-radio:checked + .status-tile {
+      border-color: #111;
+      background: #111;
+      color: #fff;
+    }
+
+    /* List & Timeline View Styles */
+    .timeline-view-wrap, .list-view-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 20px;
+    }
+
+    .timeline-day-group {
+      display: flex;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .timeline-date-side {
+      width: 100px;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: #666;
+    }
+
+    .timeline-tasks-side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .calendar-day-cell {
+        min-height: 90px;
+        padding: 4px;
+      }
+      .task-chip {
+        font-size: 8px;
+        padding: 3px 5px;
+      }
+      .weekday-header {
+        font-size: 8px;
+        padding: 8px 2px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="app-body">
+<div class="app-shell">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="dashboard.html"><span class="brand-mark">C</span><span>CreativeHub</span></a>
+    <div class="side-section-label">WORKSPACE</div>
+    <nav class="side-nav" aria-label="Main navigation">
+      <a class="side-link" href="dashboard.html"><span class="nav-ico">⌂</span><span>Dashboard</span></a>
+      <a class="side-link" href="data-table.html"><span class="nav-ico">▦</span><span>Data table</span></a>
+      <a class="side-link active" href="content-calendar.html"><span class="nav-ico">▣</span><span>Content calendar</span><span class="nav-count" id="calendarTaskBadge">12</span></a>
+      <a class="side-link" href="#" data-toast="Analytics module is coming soon"><span class="nav-ico">⌁</span><span>Analytics</span></a>
+      <a class="side-link" href="#" data-toast="Team management is coming soon"><span class="nav-ico">♙</span><span>Team</span></a>
+    </nav>
+    <div class="side-section-label side-label-lower">PREFERENCES</div>
+    <nav class="side-nav">
+      <a class="side-link" href="#" data-toast="Settings are coming soon"><span class="nav-ico">⚙</span><span>Settings</span></a>
+      <a class="side-link" href="#" data-toast="Help center is coming soon"><span class="nav-ico">?</span><span>Help center</span></a>
+      <a class="side-link" href="login-page.html"><span class="nav-ico">↪</span><span>Sign out</span></a>
+    </nav>
+    <div class="sidebar-profile">
+      <div class="profile-avatar">CH</div>
+      <div class="profile-copy"><strong>Creative Admin</strong><span>Admin workspace</span></div>
+      <button class="icon-button tiny" data-toast="Profile menu">•••</button>
+    </div>
+  </aside>
+
+  <!-- Main Content Shell -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="icon-button mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
+      <div class="breadcrumb"><span>Workspace</span><b>/</b><strong>Content calendar</strong></div>
+      <div class="topbar-actions">
+        <div class="top-search"><span>⌕</span><input type="search" id="calendarSearchInput" placeholder="Search tasks..." aria-label="Search content tasks"></div>
+        <button class="icon-button" data-toast="You're all caught up" aria-label="Notifications">♧<i class="notification-dot"></i></button>
+        <button class="profile-avatar small" data-toast="Signed in as Creative Admin" aria-label="Profile">CH</button>
+      </div>
+    </header>
+
+    <!-- Welcome & Header Section -->
+    <section class="welcome-row calendar-welcome">
+      <div>
+        <p class="eyebrow">CONTENT SCHEDULER & TIMELINE</p>
+        <h1>Content Calendar <span class="title-count" id="totalTasksCount">12</span></h1>
+        <p>Atur jadwal publikasi, kelola status konten, dan pantau linimasa tim kreatif.</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="button button-white" id="filterStatusBtn">⚡ <span>Filter Status</span></button>
+        <button class="button button-black" id="btnOpenNewTask">＋ <span>Tambah Konten</span></button>
+      </div>
+    </section>
+
+    <!-- Metrics Bar Summary -->
+    <section class="metric-grid compact-metrics">
+      <article class="metric-card">
+        <div class="metric-top"><span>Total Task</span><span class="metric-icon">▣</span></div>
+        <div class="metric-value" id="statTotal">12</div>
+        <div class="metric-bottom"><span class="metric-caption">Konten terencana</span></div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Posted</span><span class="metric-icon">✓</span></div>
+        <div class="metric-value" id="statPosted">4</div>
+        <div class="metric-bottom"><span class="trend" style="color:#16a34a">● Selesai tayang</span></div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>In Progress</span><span class="metric-icon">—</span></div>
+        <div class="metric-value" id="statProgress">5</div>
+        <div class="metric-bottom"><span class="trend" style="color:#d97706">● Sedang diproduksi</span></div>
+      </article>
+      <article class="metric-card">
+        <div class="metric-top"><span>Waiting</span><span class="metric-icon">◷</span></div>
+        <div class="metric-value" id="statWaiting">3</div>
+        <div class="metric-bottom"><span class="metric-caption">Menunggu ide/brief</span></div>
+      </article>
+    </section>
+
+    <!-- Calendar Controls & Navigation Toolbar -->
+    <div class="calendar-toolbar">
+      <div class="calendar-nav-group">
+        <button class="icon-button tiny" id="btnPrevMonth" title="Bulan Sebelumnya">←</button>
+        <span class="month-display" id="monthYearDisplay">Oktober 2026</span>
+        <button class="icon-button tiny" id="btnNextMonth" title="Bulan Berikutnya">→</button>
+        <button class="button button-white compact-button" id="btnToday">Hari ini</button>
+      </div>
+
+      <div class="view-switcher">
+        <button class="view-btn active" id="viewGridBtn">Grid Calendar</button>
+        <button class="view-btn" id="viewTimelineBtn">Timeline</button>
+        <button class="view-btn" id="viewListBtn">List View</button>
+      </div>
+    </div>
+
+    <!-- Main Calendar Display Board -->
+    <section class="calendar-container">
+      <!-- Grid View -->
+      <div id="gridCalendarView">
+        <div class="calendar-grid">
+          <div class="weekday-header">Minggu</div>
+          <div class="weekday-header">Senin</div>
+          <div class="weekday-header">Selasa</div>
+          <div class="weekday-header">Rabu</div>
+          <div class="weekday-header">Kamis</div>
+          <div class="weekday-header">Jumat</div>
+          <div class="weekday-header">Sabtu</div>
+        </div>
+        <div class="calendar-grid" id="calendarDaysGrid">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <!-- Timeline View -->
+      <div id="timelineCalendarView" class="timeline-view-wrap" style="display: none;">
+        <!-- Dynamically populated via JS -->
+      </div>
+
+      <!-- List View -->
+      <div id="listCalendarView" class="list-view-wrap" style="display: none;">
+        <!-- Dynamically populated via JS -->
+      </div>
+    </section>
+
+    <footer class="app-footer" style="margin-top: 24px;">
+      <span>© 2026 CreativeHub</span>
+      <span>Klik tanggal untuk menambah konten, atau klik task untuk mengedit.</span>
+    </footer>
+  </main>
+</div>
+
+<!-- Task/Content Form Modal Popout (Matching Reference Form Layout) -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 id="modalTitle">Tambah Ide / Task Konten</h2>
+      <button class="modal-close" id="btnCloseModal" aria-label="Tutup modal">✕</button>
+    </div>
+    <form class="modal-form" id="taskForm">
+      <input type="hidden" id="taskId">
+      
+      <div class="form-group">
+        <label for="taskTitle">Judul Task / Konten *</label>
+        <input type="text" id="taskTitle" class="form-control" placeholder="Contoh: Reels Launching Produk Baru" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="taskBrand">Brand / Client</label>
+          <select id="taskBrand" class="form-control">
+            <option value="CreativeHub">CreativeHub</option>
+            <option value="Dermaga Kopi">Dermaga Kopi</option>
+            <option value="Nocasta Terrace">Nocasta Terrace</option>
+            <option value="Tokohape">Tokohape</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="taskPlatform">Platform</label>
+          <select id="taskPlatform" class="form-control">
+            <option value="Instagram">Instagram</option>
+            <option value="TikTok">TikTok</option>
+            <option value="YouTube Shorts">YouTube Shorts</option>
+            <option value="LinkedIn">LinkedIn</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="taskDate">Tanggal Eksekusi / Publish *</label>
+          <input type="date" id="taskDate" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="taskOwner">PIC / Penanggung Jawab</label>
+          <input type="text" id="taskOwner" class="form-control" placeholder="Contoh: Olivia Rhye">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Status Konten</label>
+        <div class="status-options">
+          <label>
+            <input type="radio" name="taskStatus" value="posted" class="status-radio">
+            <div class="status-tile">✓ Posted</div>
+          </label>
+          <label>
+            <input type="radio" name="taskStatus" value="progress" class="status-radio" checked>
+            <div class="status-tile">— Progress</div>
+          </label>
+          <label>
+            <input type="radio" name="taskStatus" value="waiting" class="status-radio">
+            <div class="status-tile">○ Waiting</div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="taskBrief">Brief / Catatan Konten</label>
+        <textarea id="taskBrief" class="form-control" placeholder="Masukkan detail instruksi, pilar konten, atau hashtag..."></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="button button-white" id="btnDeleteTask" style="margin-right: auto; color: #dc2626; display: none;">Hapus Task</button>
+        <button type="button" class="button button-white" id="btnCancelModal">Batal</button>
+        <button type="submit" class="button button-black" id="btnSaveTask">Simpan Task ↗</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- App Logic & Interactive Calendar Script -->
+<script src="js/app.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  // State & Store Data
+  const monthsIndo = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  let currentDate = new Date(2026, 9, 1); // Default to October 2026 to match reference layout
+  let currentView = 'grid'; // 'grid', 'timeline', 'list'
+  let filterStatus = 'all';
+
+  // Seed Initial Task Dataset matching image references
+  let tasks = [
+    { id: 1, title: "Carousel: Audit Akun 5 Langkah", brand: "CreativeHub", platform: "Instagram", date: "2026-10-02", status: "posted", owner: "Olivia Rhye", brief: "Slide 1 hook, slide 2-5 langkah audit." },
+    { id: 2, title: "Reels: Strategi Branding 2027", brand: "CreativeHub", platform: "Instagram", date: "2026-10-02", status: "progress", owner: "Phoenix Baker", brief: "Video pendek edukasi visual." },
+    { id: 3, title: "Dermaga Kopi: Golden Hour Ambience", brand: "Dermaga Kopi", platform: "TikTok", date: "2026-10-05", status: "posted", owner: "Lana Steiner", brief: "Highlight pemandangan sore hari." },
+    { id: 4, title: "Nocasta: Promo Weekend Special", brand: "Nocasta Terrace", platform: "Instagram", date: "2026-10-08", status: "progress", owner: "Demi Wilkinson", brief: "Flyer promo diskon kopi malam." },
+    { id: 5, title: "Behind The Scenes CreativeHub", brand: "CreativeHub", platform: "YouTube Shorts", date: "2026-10-12", status: "waiting", owner: "Candice Wu", brief: "Cuplikan keseruan tim di kantor." },
+    { id: 6, title: "Tokohape: Tips Baterai Awet", brand: "Tokohape", platform: "TikTok", date: "2026-10-15", status: "posted", owner: "Drew Cano", brief: "Konten tips singkat 15 detik." },
+    { id: 7, title: "Infografis Design Trends 2027", brand: "CreativeHub", platform: "LinkedIn", date: "2026-10-19", status: "progress", owner: "Andi Pratama", brief: "Laporan tren estetika visual." },
+    { id: 8, title: "Reels: Testimonial Client Dermaga", brand: "Dermaga Kopi", platform: "Instagram", date: "2026-10-19", status: "waiting", owner: "Olivia Rhye", brief: "Ulasan pengunjung dermaga." },
+    { id: 9, title: "Weekly Content Recap", brand: "CreativeHub", platform: "Instagram", date: "2026-10-23", status: "progress", owner: "Phoenix Baker", brief: "Rangkuman postingan minggu ini." },
+    { id: 10, title: "Story Polling Engagement", brand: "Nocasta Terrace", platform: "Instagram", date: "2026-10-26", status: "posted", owner: "Lana Steiner", brief: "Tanya jawab dengan audiens." },
+    { id: 11, title: "Live Q&A Social Strategy", brand: "CreativeHub", platform: "Instagram", date: "2026-10-28", status: "progress", owner: "Olivia Rhye", brief: "Sesi live streaming bersama founder." },
+    { id: 12, title: "Monthly Digest & Showcase", brand: "CreativeHub", platform: "LinkedIn", date: "2026-10-30", status: "waiting", owner: "Demi Wilkinson", brief: "Rekap performa campaign sebulan." }
+  ];
+
+  // DOM Elements
+  const gridContainer = document.getElementById('calendarDaysGrid');
+  const monthYearDisplay = document.getElementById('monthYearDisplay');
+  const taskModal = document.getElementById('taskModal');
+  const taskForm = document.getElementById('taskForm');
+  const btnDeleteTask = document.getElementById('btnDeleteTask');
+
+  // Helpers
+  const formatYMD = (year, month, day) => {
+    const m = String(month + 1).padStart(2, '0');
+    const d = String(day).padStart(2, '0');
+    return `${year}-${m}-${d}`;
+  };
+
+  function updateMetrics() {
+    const total = tasks.length;
+    const posted = tasks.filter(t => t.status === 'posted').length;
+    const progress = tasks.filter(t => t.status === 'progress').length;
+    const waiting = tasks.filter(t => t.status === 'waiting').length;
+
+    document.getElementById('totalTasksCount').textContent = total;
+    document.getElementById('calendarTaskBadge').textContent = total;
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statPosted').textContent = posted;
+    document.getElementById('statProgress').textContent = progress;
+    document.getElementById('statWaiting').textContent = waiting;
+  }
+
+  // Render Grid Calendar View
+  function renderGridView() {
+    gridContainer.innerHTML = '';
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    monthYearDisplay.textContent = `${monthsIndo[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const searchQuery = (document.getElementById('calendarSearchInput').value || '').toLowerCase();
+
+    // Fill previous month trailing days
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const dayNum = daysInPrevMonth - i;
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day-cell other-month';
+      cell.innerHTML = `<div class="day-number-bar"><span class="day-number">${dayNum}</span></div>`;
+      gridContainer.appendChild(cell);
+    }
+
+    // Fill current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = formatYMD(year, month, day);
+      const cell = document.createElement('div');
+      cell.className = `calendar-day-cell ${dateStr === todayStr ? 'today' : ''}`;
+      cell.dataset.date = dateStr;
+
+      // Day Header inside Cell
+      const dayHeader = document.createElement('div');
+      dayHeader.className = 'day-number-bar';
+      dayHeader.innerHTML = `<span class="day-number">${day}</span><span class="add-task-quick" title="Tambah Task">＋</span>`;
+      cell.appendChild(dayHeader);
+
+      // Task Container inside Cell
+      const taskList = document.createElement('div');
+      taskList.className = 'task-list';
+
+      // Filter tasks for this day
+      let dayTasks = tasks.filter(t => t.date === dateStr);
+      if (filterStatus !== 'all') {
+        dayTasks = dayTasks.filter(t => t.status === filterStatus);
+      }
+      if (searchQuery) {
+        dayTasks = dayTasks.filter(t => t.title.toLowerCase().includes(searchQuery) || t.brand.toLowerCase().includes(searchQuery));
+      }
+
+      dayTasks.forEach(task => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = `task-chip task-status-${task.status}`;
+        chip.title = `${task.title} (${task.status})`;
+
+        let icon = '○';
+        if (task.status === 'posted') icon = '✓';
+        if (task.status === 'progress') icon = '—';
+
+        chip.innerHTML = `<span class="task-icon">${icon}</span><span class="task-title-text">${escapeHtml(task.title)}</span>`;
+        
+        // Edit event listener on task click
+        chip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openTaskModal(task);
+        });
+
+        taskList.appendChild(chip);
+      });
+
+      cell.appendChild(taskList);
+
+      // Cell click opens modal for adding new task on clicked date
+      cell.addEventListener('click', () => {
+        openTaskModal(null, dateStr);
+      });
+
+      gridContainer.appendChild(cell);
+    }
+
+    // Fill next month leading days
+    const totalCells = firstDay + daysInMonth;
+    const nextDays = (7 - (totalCells % 7)) % 7;
+    for (let i = 1; i <= nextDays; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'calendar-day-cell other-month';
+      cell.innerHTML = `<div class="day-number-bar"><span class="day-number">${i}</span></div>`;
+      gridContainer.appendChild(cell);
+    }
+  }
+
+  // Render Timeline View
+  function renderTimelineView() {
+    const container = document.getElementById('timelineCalendarView');
+    container.innerHTML = '';
+
+    const grouped = {};
+    tasks.forEach(task => {
+      if (!grouped[task.date]) grouped[task.date] = [];
+      grouped[task.date].push(task);
+    });
+
+    const dates = Object.keys(grouped).sort();
+    if (dates.length === 0) {
+      container.innerHTML = '<p class="empty-state show">Belum ada task/konten terdaftar.</p>';
+      return;
+    }
+
+    dates.forEach(date => {
+      const dayGroup = document.createElement('div');
+      dayGroup.className = 'timeline-day-group';
+
+      const dateSide = document.createElement('div');
+      dateSide.className = 'timeline-date-side';
+      dateSide.textContent = date;
+
+      const tasksSide = document.createElement('div');
+      tasksSide.className = 'timeline-tasks-side';
+
+      grouped[date].forEach(task => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = `task-chip task-status-${task.status}`;
+        chip.style.padding = '10px 14px';
+        chip.innerHTML = `<strong>[${task.brand}]</strong> ${escapeHtml(task.title)} &bull; <em>${task.owner || 'Unassigned'}</em>`;
+        chip.addEventListener('click', () => openTaskModal(task));
+        tasksSide.appendChild(chip);
+      });
+
+      dayGroup.appendChild(dateSide);
+      dayGroup.appendChild(tasksSide);
+      container.appendChild(dayGroup);
+    });
+  }
+
+  // Render List View
+  function renderListView() {
+    const container = document.getElementById('listCalendarView');
+    container.innerHTML = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>KONTEN / TASK</th>
+            <th>BRAND</th>
+            <th>PLATFORM</th>
+            <th>TANGGAL</th>
+            <th>STATUS</th>
+            <th>PIC</th>
+          </tr>
+        </thead>
+        <tbody id="listTableBody"></tbody>
+      </table>
+    `;
+
+    const tbody = document.getElementById('listTableBody');
+    tasks.forEach(task => {
+      const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      tr.innerHTML = `
+        <td><strong>${escapeHtml(task.title)}</strong></td>
+        <td>${escapeHtml(task.brand)}</td>
+        <td>${escapeHtml(task.platform)}</td>
+        <td>${task.date}</td>
+        <td><span class="status-pill status-${task.status === 'posted' ? 'active' : task.status === 'progress' ? 'pending' : 'inactive'}">${task.status}</span></td>
+        <td>${escapeHtml(task.owner || '-')}</td>
+      `;
+      tr.addEventListener('click', () => openTaskModal(task));
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderView() {
+    updateMetrics();
+    if (currentView === 'grid') {
+      document.getElementById('gridCalendarView').style.display = 'block';
+      document.getElementById('timelineCalendarView').style.display = 'none';
+      document.getElementById('listCalendarView').style.display = 'none';
+      renderGridView();
+    } else if (currentView === 'timeline') {
+      document.getElementById('gridCalendarView').style.display = 'none';
+      document.getElementById('timelineCalendarView').style.display = 'block';
+      document.getElementById('listCalendarView').style.display = 'none';
+      renderTimelineView();
+    } else if (currentView === 'list') {
+      document.getElementById('gridCalendarView').style.display = 'none';
+      document.getElementById('timelineCalendarView').style.display = 'none';
+      document.getElementById('listCalendarView').style.display = 'block';
+      renderListView();
+    }
+  }
+
+  // Modal Controllers
+  function openTaskModal(task = null, datePreset = null) {
+    taskForm.reset();
+    if (task) {
+      document.getElementById('modalTitle').textContent = 'Edit Task Konten';
+      document.getElementById('taskId').value = task.id;
+      document.getElementById('taskTitle').value = task.title;
+      document.getElementById('taskBrand').value = task.brand;
+      document.getElementById('taskPlatform').value = task.platform;
+      document.getElementById('taskDate').value = task.date;
+      document.getElementById('taskOwner').value = task.owner || '';
+      document.getElementById('taskBrief').value = task.brief || '';
+
+      const statusRadio = taskForm.querySelector(`input[name="taskStatus"][value="${task.status}"]`);
+      if (statusRadio) statusRadio.checked = true;
+
+      btnDeleteTask.style.display = 'block';
+    } else {
+      document.getElementById('modalTitle').textContent = 'Tambah Task Konten Baru';
+      document.getElementById('taskId').value = '';
+      document.getElementById('taskDate').value = datePreset || new Date().toISOString().split('T')[0];
+      btnDeleteTask.style.display = 'none';
+    }
+    taskModal.classList.add('active');
+  }
+
+  function closeTaskModal() {
+    taskModal.classList.remove('active');
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, match => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[match]));
+  }
+
+  // Event Listeners Initialization
+  document.getElementById('btnPrevMonth').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderView();
+  });
+
+  document.getElementById('btnNextMonth').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderView();
+  });
+
+  document.getElementById('btnToday').addEventListener('click', () => {
+    currentDate = new Date();
+    renderView();
+  });
+
+  document.getElementById('viewGridBtn').addEventListener('click', function() {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentView = 'grid';
+    renderView();
+  });
+
+  document.getElementById('viewTimelineBtn').addEventListener('click', function() {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentView = 'timeline';
+    renderView();
+  });
+
+  document.getElementById('viewListBtn').addEventListener('click', function() {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentView = 'list';
+    renderView();
+  });
+
+  document.getElementById('btnOpenNewTask').addEventListener('click', () => openTaskModal());
+  document.getElementById('btnCloseModal').addEventListener('click', closeTaskModal);
+  document.getElementById('btnCancelModal').addEventListener('click', closeTaskModal);
+
+  taskModal.addEventListener('click', (e) => {
+    if (e.target === taskModal) closeTaskModal();
+  });
+
+  // Handle Form Submit (Add/Edit Task)
+  taskForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = document.getElementById('taskId').value;
+    const title = document.getElementById('taskTitle').value.trim();
+    const brand = document.getElementById('taskBrand').value;
+    const platform = document.getElementById('taskPlatform').value;
+    const date = document.getElementById('taskDate').value;
+    const owner = document.getElementById('taskOwner').value.trim();
+    const brief = document.getElementById('taskBrief').value.trim();
+    const status = taskForm.querySelector('input[name="taskStatus"]:checked').value;
+
+    if (id) {
+      // Update existing
+      const taskIndex = tasks.findIndex(t => t.id == id);
+      if (taskIndex !== -1) {
+        tasks[taskIndex] = { id: Number(id), title, brand, platform, date, owner, brief, status };
+      }
+    } else {
+      // Create new
+      const newId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+      tasks.push({ id: newId, title, brand, platform, date, owner, brief, status });
+    }
+
+    closeTaskModal();
+    renderView();
+  });
+
+  // Handle Delete Task
+  btnDeleteTask.addEventListener('click', () => {
+    const id = document.getElementById('taskId').value;
+    if (id && confirm('Apakah Anda yakin ingin menghapus task ini?')) {
+      tasks = tasks.filter(t => t.id != id);
+      closeTaskModal();
+      renderView();
+    }
+  });
+
+  // Search and Filter Listeners
+  document.getElementById('calendarSearchInput').addEventListener('input', renderGridView);
+
+  document.getElementById('filterStatusBtn').addEventListener('click', () => {
+    const filterOptions = ['all', 'posted', 'progress', 'waiting'];
+    const currentIndex = filterOptions.indexOf(filterStatus);
+    filterStatus = filterOptions[(currentIndex + 1) % filterOptions.length];
+    document.getElementById('filterStatusBtn').querySelector('span').textContent = `Filter: ${filterStatus.toUpperCase()}`;
+    renderView();
+  });
+
+  // Initial Execution
+  renderView();
+})();
+</script>
+</body>
+</html>

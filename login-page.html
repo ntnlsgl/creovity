@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#e9e9e9"><title>Masuk — CreativeHub</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="login-body">
+  <main class="login-shell">
+    <section class="login-visual" aria-label="CreativeHub introduction">
+      <a class="brand brand-light" href="login-page.html"><span class="brand-mark">C</span><span>CreativeHub</span></a>
+      <div class="login-copy">
+        <p class="eyebrow">Your creative workspace</p>
+        <h1>Make good work.<br><span>Make it happen.</span></h1>
+        <p>One calm space to plan content, track performance, and keep your team moving forward.</p>
+      </div>
+      <div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div>
+      <div class="visual-card">
+        <div class="visual-card-top"><span class="live-dot"></span> WEEKLY OVERVIEW <span class="visual-card-more">•••</span></div>
+        <div class="visual-stat"><strong>+28.4%</strong><span>Content performance</span></div>
+        <div class="mini-chart"><i style="height:28%"></i><i style="height:44%"></i><i style="height:36%"></i><i style="height:61%"></i><i style="height:48%"></i><i style="height:78%"></i><i style="height:65%"></i><i style="height:94%"></i><i style="height:76%"></i><i style="height:100%"></i></div>
+        <div class="visual-card-foot"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+      </div>
+      <p class="login-visual-note">Designed for clarity. Built for creative momentum.</p>
+    </section>
+    <section class="login-form-side">
+      <div class="login-mobile-brand"><span class="brand-mark">C</span><span>CreativeHub</span></div>
+      <div class="login-form-wrap">
+        <div class="form-heading"><p class="eyebrow">Welcome back</p><h2>Sign in to your space.</h2><p>Enter your account details to continue.</p></div>
+        <form id="loginForm" class="auth-form">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" placeholder="you@company.com" autocomplete="username" required>
+          <div class="label-row"><label for="password">Password</label><a href="#" id="forgotLink">Forgot password?</a></div>
+          <div class="password-wrap"><input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" minlength="4" required><button class="password-toggle" type="button" id="togglePassword" aria-label="Show password"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+          <div class="form-options"><label class="check-label"><input type="checkbox" id="remember"> <span>Keep me signed in</span></label></div>
+          <button class="button button-black button-wide" type="submit"><span>Sign in</span><span class="button-arrow">↗</span></button>
+          <p class="form-feedback" id="loginFeedback" role="status" aria-live="polite"></p>
+        </form>
+        <div class="auth-divider"><span></span><small>OR CONTINUE WITH</small><span></span></div>
+        <button class="button button-google button-wide" type="button" id="googleLogin"><span class="google-g">G</span> Continue with Google</button>
+        <p class="signup-note">New to CreativeHub? <a href="#" id="signupLink">Request access</a></p>
+      </div>
+      <footer class="login-footer"><span>© 2026 CreativeHub</span><a href="#">Privacy</a><a href="#">Help center</a></footer>
+    </section>
+  </main>
+  <script src="js/app.js"></script>
+</body>
+</html>
