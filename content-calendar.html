@@ -193,14 +193,12 @@
     }
 
     /* Task Status Badges matching Reference */
-    /* POSTED: Light grey background, dark text, checkmark indicator */
     .task-status-posted {
       background: #ececec;
       color: #222;
       border-color: #dedede;
     }
 
-    /* PROGRESS: Light yellow background with yellow bar/stripe accent */
     .task-status-progress {
       background: #fffbeb;
       color: #854d0e;
@@ -208,7 +206,6 @@
       border-left: 3px solid #f59e0b;
     }
 
-    /* WAITING: Clean white or neutral background with subtle outline */
     .task-status-waiting {
       background: #ffffff;
       color: #555;
@@ -241,7 +238,7 @@
       border-radius: 4px;
     }
 
-    /* Modal Form Popout (Matching Image Reference 2) */
+    /* Modal Form Popout */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -371,7 +368,6 @@
       border-top: 1px solid #eee;
     }
 
-    /* Status Selector Badges inside Form */
     .status-options {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -406,7 +402,6 @@
       color: #fff;
     }
 
-    /* List & Timeline View Styles */
     .timeline-view-wrap, .list-view-wrap {
       display: flex;
       flex-direction: column;
@@ -464,7 +459,7 @@
     <nav class="side-nav" aria-label="Main navigation">
       <a class="side-link" href="dashboard.html"><span class="nav-ico">⌂</span><span>Dashboard</span></a>
       <a class="side-link" href="data-table.html"><span class="nav-ico">▦</span><span>Data table</span></a>
-      <a class="side-link active" href="content-calendar.html"><span class="nav-ico">▣</span><span>Content calendar</span><span class="nav-count" id="calendarTaskBadge">12</span></a>
+      <a class="side-link active" href="content-calendar.html"><span class="nav-ico">▣</span><span>Content calendar</span><span class="nav-count" id="calendarTaskBadge">0</span></a>
       <a class="side-link" href="#" data-toast="Analytics module is coming soon"><span class="nav-ico">⌁</span><span>Analytics</span></a>
       <a class="side-link" href="#" data-toast="Team management is coming soon"><span class="nav-ico">♙</span><span>Team</span></a>
     </nav>
@@ -497,7 +492,7 @@
     <section class="welcome-row calendar-welcome">
       <div>
         <p class="eyebrow">CONTENT SCHEDULER & TIMELINE</p>
-        <h1>Content Calendar <span class="title-count" id="totalTasksCount">12</span></h1>
+        <h1>Content Calendar <span class="title-count" id="totalTasksCount">0</span></h1>
         <p>Atur jadwal publikasi, kelola status konten, dan pantau linimasa tim kreatif.</p>
       </div>
       <div class="welcome-actions">
@@ -510,22 +505,22 @@
     <section class="metric-grid compact-metrics">
       <article class="metric-card">
         <div class="metric-top"><span>Total Task</span><span class="metric-icon">▣</span></div>
-        <div class="metric-value" id="statTotal">12</div>
+        <div class="metric-value" id="statTotal">0</div>
         <div class="metric-bottom"><span class="metric-caption">Konten terencana</span></div>
       </article>
       <article class="metric-card">
         <div class="metric-top"><span>Posted</span><span class="metric-icon">✓</span></div>
-        <div class="metric-value" id="statPosted">4</div>
+        <div class="metric-value" id="statPosted">0</div>
         <div class="metric-bottom"><span class="trend" style="color:#16a34a">● Selesai tayang</span></div>
       </article>
       <article class="metric-card">
         <div class="metric-top"><span>In Progress</span><span class="metric-icon">—</span></div>
-        <div class="metric-value" id="statProgress">5</div>
+        <div class="metric-value" id="statProgress">0</div>
         <div class="metric-bottom"><span class="trend" style="color:#d97706">● Sedang diproduksi</span></div>
       </article>
       <article class="metric-card">
         <div class="metric-top"><span>Waiting</span><span class="metric-icon">◷</span></div>
-        <div class="metric-value" id="statWaiting">3</div>
+        <div class="metric-value" id="statWaiting">0</div>
         <div class="metric-bottom"><span class="metric-caption">Menunggu ide/brief</span></div>
       </article>
     </section>
@@ -559,20 +554,14 @@
           <div class="weekday-header">Jumat</div>
           <div class="weekday-header">Sabtu</div>
         </div>
-        <div class="calendar-grid" id="calendarDaysGrid">
-          <!-- Dynamically populated via JS -->
-        </div>
+        <div class="calendar-grid" id="calendarDaysGrid"></div>
       </div>
 
       <!-- Timeline View -->
-      <div id="timelineCalendarView" class="timeline-view-wrap" style="display: none;">
-        <!-- Dynamically populated via JS -->
-      </div>
+      <div id="timelineCalendarView" class="timeline-view-wrap" style="display: none;"></div>
 
       <!-- List View -->
-      <div id="listCalendarView" class="list-view-wrap" style="display: none;">
-        <!-- Dynamically populated via JS -->
-      </div>
+      <div id="listCalendarView" class="list-view-wrap" style="display: none;"></div>
     </section>
 
     <footer class="app-footer" style="margin-top: 24px;">
@@ -582,7 +571,7 @@
   </main>
 </div>
 
-<!-- Task/Content Form Modal Popout (Matching Reference Form Layout) -->
+<!-- Task/Content Form Modal Popout -->
 <div class="modal-overlay" id="taskModal">
   <div class="modal-card">
     <div class="modal-header">
@@ -665,94 +654,20 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- App Logic & Interactive Calendar Script -->
-<script src="js/app.js"></script>
 <script>
 (() => {
   "use strict";
 
-  // State & Store Data
+  // Inisialisasi Supabase Client (URL & Key diperbaiki)
+  const SUPABASE_URL = 'https://ghztrnjzgzfrfiovxvn.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_R6oEri4nKVKHuHbVzTwsrQ_b6BRv...'; // Ganti dengan Publishable key lengkap Anda dari Supabase
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  let tasks = [];
   const monthsIndo = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-  let currentDate = new Date(2026, 11, 1); // Default to October 2026 to match reference layout
-  let currentView = 'grid'; // 'grid', 'timeline', 'list'
+  let currentDate = new Date(2026, 9, 1);
+  let currentView = 'grid';
   let filterStatus = 'all';
-
-  // 1. Inisialisasi Supabase Client
-const SUPABASE_URL = 'https://ghztrnjzgzyfrfiovxvn.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoenRybmp6Z3p5ZnJmaW92eHZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1MjY3MTUsImV4cCI6MjEwOTEwMjcxNX0.Gkeen4cqGT_h2-F_kvA6Zfv2DM39-bl_EenA4FTMAzQ';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-let tasks = []; // Data awal kosong, diisi dari Supabase
-
-// 2. Fungsi READ (Ambil Data dari Database)
-async function fetchTasks() {
-  const { data, error } = await supabase
-    .from('content_calendar')
-    .select('*');
-
-  if (error) {
-    console.error('Error fetching data:', error);
-    return;
-  }
-
-  tasks = data || [];
-  renderView(); // Render ulang tampilan tabel/grid
-}
-
-// 3. Update Handler Simpan & Edit Task (CREATE & UPDATE)
-taskForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const id = document.getElementById('taskId').value;
-  const title = document.getElementById('taskTitle').value.trim();
-  const brand = document.getElementById('taskBrand').value;
-  const platform = document.getElementById('taskPlatform').value;
-  const date = document.getElementById('taskDate').value;
-  const owner = document.getElementById('taskOwner').value.trim();
-  const brief = document.getElementById('taskBrief').value.trim();
-  const status = taskForm.querySelector('input[name="taskStatus"]:checked').value;
-
-  const payload = { title, brand, platform, date, owner, brief, status };
-
-  if (id) {
-    // UPDATE Data
-    const { error } = await supabase
-      .from('content_calendar')
-      .update(payload)
-      .eq('id', id);
-
-    if (error) alert('Gagal mengupdate task');
-  } else {
-    // CREATE Data Baru
-    const { error } = await supabase
-      .from('content_calendar')
-      .insert([payload]);
-
-    if (error) alert('Gagal menambah task');
-  }
-
-  closeTaskModal();
-  fetchTasks(); // Reload data dari database
-});
-
-// 4. Update Handler Hapus Task (DELETE)
-btnDeleteTask.addEventListener('click', async () => {
-  const id = document.getElementById('taskId').value;
-  if (id && confirm('Apakah Anda yakin ingin menghapus task ini?')) {
-    const { error } = await supabase
-      .from('content_calendar')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      alert('Gagal menghapus task');
-    } else {
-      closeTaskModal();
-      fetchTasks(); // Reload data dari database
-    }
-  }
-});
-
-// Panggil fetchTasks saat halaman pertama kali di-load
-fetchTasks();
 
   // DOM Elements
   const gridContainer = document.getElementById('calendarDaysGrid');
@@ -782,6 +697,21 @@ fetchTasks();
     document.getElementById('statWaiting').textContent = waiting;
   }
 
+  // Fungsi READ (Ambil Data dari Database)
+  async function fetchTasks() {
+    const { data, error } = await supabase
+      .from('content_calendar')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching data:', error);
+      return;
+    }
+
+    tasks = data || [];
+    renderView();
+  }
+
   // Render Grid Calendar View
   function renderGridView() {
     gridContainer.innerHTML = '';
@@ -797,7 +727,6 @@ fetchTasks();
     const todayStr = new Date().toISOString().split('T')[0];
     const searchQuery = (document.getElementById('calendarSearchInput').value || '').toLowerCase();
 
-    // Fill previous month trailing days
     for (let i = firstDay - 1; i >= 0; i--) {
       const dayNum = daysInPrevMonth - i;
       const cell = document.createElement('div');
@@ -806,24 +735,20 @@ fetchTasks();
       gridContainer.appendChild(cell);
     }
 
-    // Fill current month days
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = formatYMD(year, month, day);
       const cell = document.createElement('div');
       cell.className = `calendar-day-cell ${dateStr === todayStr ? 'today' : ''}`;
       cell.dataset.date = dateStr;
 
-      // Day Header inside Cell
       const dayHeader = document.createElement('div');
       dayHeader.className = 'day-number-bar';
       dayHeader.innerHTML = `<span class="day-number">${day}</span><span class="add-task-quick" title="Tambah Task">＋</span>`;
       cell.appendChild(dayHeader);
 
-      // Task Container inside Cell
       const taskList = document.createElement('div');
       taskList.className = 'task-list';
 
-      // Filter tasks for this day
       let dayTasks = tasks.filter(t => t.date === dateStr);
       if (filterStatus !== 'all') {
         dayTasks = dayTasks.filter(t => t.status === filterStatus);
@@ -844,7 +769,6 @@ fetchTasks();
 
         chip.innerHTML = `<span class="task-icon">${icon}</span><span class="task-title-text">${escapeHtml(task.title)}</span>`;
         
-        // Edit event listener on task click
         chip.addEventListener('click', (e) => {
           e.stopPropagation();
           openTaskModal(task);
@@ -855,7 +779,6 @@ fetchTasks();
 
       cell.appendChild(taskList);
 
-      // Cell click opens modal for adding new task on clicked date
       cell.addEventListener('click', () => {
         openTaskModal(null, dateStr);
       });
@@ -863,7 +786,6 @@ fetchTasks();
       gridContainer.appendChild(cell);
     }
 
-    // Fill next month leading days
     const totalCells = firstDay + daysInMonth;
     const nextDays = (7 - (totalCells % 7)) % 7;
     for (let i = 1; i <= nextDays; i++) {
@@ -874,7 +796,6 @@ fetchTasks();
     }
   }
 
-  // Render Timeline View
   function renderTimelineView() {
     const container = document.getElementById('timelineCalendarView');
     container.innerHTML = '';
@@ -887,7 +808,7 @@ fetchTasks();
 
     const dates = Object.keys(grouped).sort();
     if (dates.length === 0) {
-      container.innerHTML = '<p class="empty-state show">Belum ada task/konten terdaftar.</p>';
+      container.innerHTML = '<p class="empty-state show" style="padding:20px;">Belum ada task/konten terdaftar.</p>';
       return;
     }
 
@@ -918,19 +839,18 @@ fetchTasks();
     });
   }
 
-  // Render List View
   function renderListView() {
     const container = document.getElementById('listCalendarView');
     container.innerHTML = `
-      <table class="data-table">
+      <table class="data-table" style="width:100%; border-collapse:collapse;">
         <thead>
-          <tr>
-            <th>KONTEN / TASK</th>
-            <th>BRAND</th>
-            <th>PLATFORM</th>
-            <th>TANGGAL</th>
-            <th>STATUS</th>
-            <th>PIC</th>
+          <tr style="text-align:left; border-bottom:1px solid #eee;">
+            <th style="padding:10px;">KONTEN / TASK</th>
+            <th style="padding:10px;">BRAND</th>
+            <th style="padding:10px;">PLATFORM</th>
+            <th style="padding:10px;">TANGGAL</th>
+            <th style="padding:10px;">STATUS</th>
+            <th style="padding:10px;">PIC</th>
           </tr>
         </thead>
         <tbody id="listTableBody"></tbody>
@@ -941,13 +861,14 @@ fetchTasks();
     tasks.forEach(task => {
       const tr = document.createElement('tr');
       tr.style.cursor = 'pointer';
+      tr.style.borderBottom = '1px solid #f9f9f9';
       tr.innerHTML = `
-        <td><strong>${escapeHtml(task.title)}</strong></td>
-        <td>${escapeHtml(task.brand)}</td>
-        <td>${escapeHtml(task.platform)}</td>
-        <td>${task.date}</td>
-        <td><span class="status-pill status-${task.status === 'posted' ? 'active' : task.status === 'progress' ? 'pending' : 'inactive'}">${task.status}</span></td>
-        <td>${escapeHtml(task.owner || '-')}</td>
+        <td style="padding:10px;"><strong>${escapeHtml(task.title)}</strong></td>
+        <td style="padding:10px;">${escapeHtml(task.brand)}</td>
+        <td style="padding:10px;">${escapeHtml(task.platform)}</td>
+        <td style="padding:10px;">${task.date}</td>
+        <td style="padding:10px;"><span style="padding:3px 8px; border-radius:6px; font-size:10px; background:#eee;">${task.status}</span></td>
+        <td style="padding:10px;">${escapeHtml(task.owner || '-')}</td>
       `;
       tr.addEventListener('click', () => openTaskModal(task));
       tbody.appendChild(tr);
@@ -974,7 +895,6 @@ fetchTasks();
     }
   }
 
-  // Modal Controllers
   function openTaskModal(task = null, datePreset = null) {
     taskForm.reset();
     if (task) {
@@ -1055,8 +975,8 @@ fetchTasks();
     if (e.target === taskModal) closeTaskModal();
   });
 
-  // Handle Form Submit (Add/Edit Task)
-  taskForm.addEventListener('submit', (e) => {
+  // Handle Form Submit (Create & Update to Supabase)
+  taskForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('taskId').value;
     const title = document.getElementById('taskTitle').value.trim();
@@ -1067,33 +987,34 @@ fetchTasks();
     const brief = document.getElementById('taskBrief').value.trim();
     const status = taskForm.querySelector('input[name="taskStatus"]:checked').value;
 
+    const payload = { title, brand, platform, date, owner, brief, status };
+
     if (id) {
-      // Update existing
-      const taskIndex = tasks.findIndex(t => t.id == id);
-      if (taskIndex !== -1) {
-        tasks[taskIndex] = { id: Number(id), title, brand, platform, date, owner, brief, status };
-      }
+      const { error } = await supabase.from('content_calendar').update(payload).eq('id', id);
+      if (error) alert('Gagal mengupdate task: ' + error.message);
     } else {
-      // Create new
-      const newId = tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
-      tasks.push({ id: newId, title, brand, platform, date, owner, brief, status });
+      const { error } = await supabase.from('content_calendar').insert([payload]);
+      if (error) alert('Gagal menambah task: ' + error.message);
     }
 
     closeTaskModal();
-    renderView();
+    fetchTasks();
   });
 
-  // Handle Delete Task
-  btnDeleteTask.addEventListener('click', () => {
+  // Handle Delete Task (Delete from Supabase)
+  btnDeleteTask.addEventListener('click', async () => {
     const id = document.getElementById('taskId').value;
     if (id && confirm('Apakah Anda yakin ingin menghapus task ini?')) {
-      tasks = tasks.filter(t => t.id != id);
-      closeTaskModal();
-      renderView();
+      const { error } = await supabase.from('content_calendar').delete().eq('id', id);
+      if (error) {
+        alert('Gagal menghapus task: ' + error.message);
+      } else {
+        closeTaskModal();
+        fetchTasks();
+      }
     }
   });
 
-  // Search and Filter Listeners
   document.getElementById('calendarSearchInput').addEventListener('input', renderGridView);
 
   document.getElementById('filterStatusBtn').addEventListener('click', () => {
@@ -1104,8 +1025,8 @@ fetchTasks();
     renderView();
   });
 
-  // Initial Execution
-  renderView();
+  // Initial Load
+  fetchTasks();
 })();
 </script>
 </body>
