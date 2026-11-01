@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#e9e9e9">
   <title>Content Calendar — CreativeHub</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* Content Calendar Custom Styles & Component Enhancements */
     .calendar-welcome {
@@ -671,25 +672,87 @@
 
   // State & Store Data
   const monthsIndo = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-  let currentDate = new Date(2026, 10, 1); // Default to October 2026 to match reference layout
+  let currentDate = new Date(2026, 11, 1); // Default to October 2026 to match reference layout
   let currentView = 'grid'; // 'grid', 'timeline', 'list'
   let filterStatus = 'all';
 
-  // Seed Initial Task Dataset matching image references
-  let tasks = [
-    { id: 1, title: "Carousel: Audit Akun 5 Langkah", brand: "CreativeHub", platform: "Instagram", date: "2026-10-02", status: "posted", owner: "Olivia Rhye", brief: "Slide 1 hook, slide 2-5 langkah audit." },
-    { id: 2, title: "Reels: Strategi Branding 2027", brand: "CreativeHub", platform: "Instagram", date: "2026-10-02", status: "progress", owner: "Phoenix Baker", brief: "Video pendek edukasi visual." },
-    { id: 3, title: "Dermaga Kopi: Golden Hour Ambience", brand: "Dermaga Kopi", platform: "TikTok", date: "2026-10-05", status: "posted", owner: "Lana Steiner", brief: "Highlight pemandangan sore hari." },
-    { id: 4, title: "Nocasta: Promo Weekend Special", brand: "Nocasta Terrace", platform: "Instagram", date: "2026-10-08", status: "progress", owner: "Demi Wilkinson", brief: "Flyer promo diskon kopi malam." },
-    { id: 5, title: "Behind The Scenes CreativeHub", brand: "CreativeHub", platform: "YouTube Shorts", date: "2026-10-12", status: "waiting", owner: "Candice Wu", brief: "Cuplikan keseruan tim di kantor." },
-    { id: 6, title: "Tokohape: Tips Baterai Awet", brand: "Tokohape", platform: "TikTok", date: "2026-10-15", status: "posted", owner: "Drew Cano", brief: "Konten tips singkat 15 detik." },
-    { id: 7, title: "Infografis Design Trends 2027", brand: "CreativeHub", platform: "LinkedIn", date: "2026-10-19", status: "progress", owner: "Andi Pratama", brief: "Laporan tren estetika visual." },
-    { id: 8, title: "Reels: Testimonial Client Dermaga", brand: "Dermaga Kopi", platform: "Instagram", date: "2026-10-19", status: "waiting", owner: "Olivia Rhye", brief: "Ulasan pengunjung dermaga." },
-    { id: 9, title: "Weekly Content Recap", brand: "CreativeHub", platform: "Instagram", date: "2026-10-23", status: "progress", owner: "Phoenix Baker", brief: "Rangkuman postingan minggu ini." },
-    { id: 10, title: "Story Polling Engagement", brand: "Nocasta Terrace", platform: "Instagram", date: "2026-10-26", status: "posted", owner: "Lana Steiner", brief: "Tanya jawab dengan audiens." },
-    { id: 11, title: "Live Q&A Social Strategy", brand: "CreativeHub", platform: "Instagram", date: "2026-10-28", status: "progress", owner: "Olivia Rhye", brief: "Sesi live streaming bersama founder." },
-    { id: 12, title: "Monthly Digest & Showcase", brand: "CreativeHub", platform: "LinkedIn", date: "2026-10-30", status: "waiting", owner: "Demi Wilkinson", brief: "Rekap performa campaign sebulan." }
-  ];
+  // 1. Inisialisasi Supabase Client
+const SUPABASE_URL = 'https://PROJECT_ID_ANDA.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let tasks = []; // Data awal kosong, diisi dari Supabase
+
+// 2. Fungsi READ (Ambil Data dari Database)
+async function fetchTasks() {
+  const { data, error } = await supabase
+    .from('content_calendar')
+    .select('*');
+
+  if (error) {
+    console.error('Error fetching data:', error);
+    return;
+  }
+
+  tasks = data || [];
+  renderView(); // Render ulang tampilan tabel/grid
+}
+
+// 3. Update Handler Simpan & Edit Task (CREATE & UPDATE)
+taskForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('taskId').value;
+  const title = document.getElementById('taskTitle').value.trim();
+  const brand = document.getElementById('taskBrand').value;
+  const platform = document.getElementById('taskPlatform').value;
+  const date = document.getElementById('taskDate').value;
+  const owner = document.getElementById('taskOwner').value.trim();
+  const brief = document.getElementById('taskBrief').value.trim();
+  const status = taskForm.querySelector('input[name="taskStatus"]:checked').value;
+
+  const payload = { title, brand, platform, date, owner, brief, status };
+
+  if (id) {
+    // UPDATE Data
+    const { error } = await supabase
+      .from('content_calendar')
+      .update(payload)
+      .eq('id', id);
+
+    if (error) alert('Gagal mengupdate task');
+  } else {
+    // CREATE Data Baru
+    const { error } = await supabase
+      .from('content_calendar')
+      .insert([payload]);
+
+    if (error) alert('Gagal menambah task');
+  }
+
+  closeTaskModal();
+  fetchTasks(); // Reload data dari database
+});
+
+// 4. Update Handler Hapus Task (DELETE)
+btnDeleteTask.addEventListener('click', async () => {
+  const id = document.getElementById('taskId').value;
+  if (id && confirm('Apakah Anda yakin ingin menghapus task ini?')) {
+    const { error } = await supabase
+      .from('content_calendar')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert('Gagal menghapus task');
+    } else {
+      closeTaskModal();
+      fetchTasks(); // Reload data dari database
+    }
+  }
+});
+
+// Panggil fetchTasks saat halaman pertama kali di-load
+fetchTasks();
 
   // DOM Elements
   const gridContainer = document.getElementById('calendarDaysGrid');
